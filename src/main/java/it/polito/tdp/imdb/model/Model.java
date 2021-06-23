@@ -28,14 +28,18 @@ public class Model {
 		Graphs.addAllVertices(grafo, dao.getActorByGenere(g, idMap));
 		
 		//aggiungo gli archi 
+		for(Arco a: dao.getArchi(g, idMap)) {
+			if(grafo.containsVertex(a.getA1()) && grafo.containsVertex(a.getA2())) {
+				DefaultWeightedEdge e = this.grafo.addEdge(a.getA1(), a.getA2());
+				if(e == null) {
+					Graphs.addEdgeWithVertices(grafo, a.getA1(), a.getA2());
+				}
+			}
+		}
+		System.out.println("vertici " + grafo.vertexSet().size());
+		System.out.println("archi " + grafo.edgeSet().size());
+
 	}
-	
-	
-	
-	
-	
-	
-	
 
 	public List<String> getAllGeneri() {
 		return dao.getAllGeneri();

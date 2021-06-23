@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import it.polito.tdp.imdb.model.Actor;
+import it.polito.tdp.imdb.model.Arco;
 import it.polito.tdp.imdb.model.Director;
 import it.polito.tdp.imdb.model.Movie;
 
@@ -116,7 +117,7 @@ public class ImdbDAO {
 	
 	public List<Actor> getActorByGenere(String g, Map<Integer,Actor> map){
 		String sql =  "SELECT a.first_name AS nome, a.last_name AS cognome, a.id AS actorId, a.gender as gender "
-				+ "FROM actors a, movies_genres mg, roles "
+				+ "FROM actors a, movies_genres mg, roles r "
 				+ "WHERE a.id = r.actor_id AND r.movie_id = mg.movie_id AND mg.genre = ? "
 				+ "GROUP BY a.id "
 				+ "ORDER BY a.first_name ASC";
@@ -128,8 +129,8 @@ public class ImdbDAO {
 			st.setString(1, g);
 			ResultSet res = st.executeQuery();
 			while (res.next()) {
-
-				result.add(map.get(res.getInt("id")));
+		
+				result.add(map.get(res.getInt("actorId")));
 			}
 			conn.close();
 			return result;
@@ -139,6 +140,35 @@ public class ImdbDAO {
 			return null;
 		}
 		
+	}
+	public List<Arco> getArchi(String g, Map<Integer, Actor> map){
+		String sql = "SELECT  a1.id AS a1Id, a2.id AS a2Id, COUNT(*) AS peso "
+				+ "FROM actors a1, actors a2, movies_genres mg, roles r1, roles r2 "
+				+ "WHERE a1.id = r1.actor_id AND a2.id = r2.actor_id AND r1.movie_id = r2.movie_id AND r1.movie_id = mg.movie_id AND mg.genre = ? AND a1.id <> a2.id "
+				+ "GROUP BY a1.id, a2.id";
+		List<Arco> result = new LinkedList<Arco>();
+		Connection conn = DBConnect.getConnection();
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, g);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+
+				Actor a1 = map.get(res.getInt("a1Id"));
+				Actor a2 = map.get(res.getInt("a2Id"));
+				if(a1!=null && a2!=null) {
+					Arco arco = new Arco(a1,a2,res.getInt("peso"));
+					result.add(arco);
+				}
+				
+			}
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	
