@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import it.polito.tdp.imdb.model.Actor;
 import it.polito.tdp.imdb.model.Director;
@@ -85,7 +86,29 @@ public class ImdbDAO {
 	}
 	
 	
-	
+	public List<String> getAllGeneri(){
+		String sql = "SELECT  genre AS genere "
+				+"FROM movies_genres "
+				+"GROUP BY genre";
+		List<String> result = new LinkedList<String>();
+		Connection conn = DBConnect.getConnection();
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+
+				String nomeGenere = new String(res.getString("genere"));
+				
+				result.add(nomeGenere);
+			}
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 	
 	
